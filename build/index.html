@@ -6,25 +6,55 @@
 <title>Build your own digital chief of staff</title>
 <meta name="description" content="A free starter kit for setting up a digital chief of staff inside the AI tool your institution already approved.">
 <style>
-  :root { --bg:#F7F5F0; --ink:#14213D; --muted:#3D4A5C; --rule:#C9C2B4; --accent:#A35410; }
+  :root { --bg:#F7F5F0; --ink:#14213D; --muted:#3D4A5C; --rule:#C9C2B4; --accent:#A35410; --card:#FFFFFF; }
   @media (prefers-color-scheme: dark) {
-    :root { --bg:#14213D; --ink:#F7F5F0; --muted:#C9CFD8; --rule:#3D4A5C; --accent:#F2C79A; }
+    :root { --bg:#14213D; --ink:#F7F5F0; --muted:#C9CFD8; --rule:#3D4A5C; --accent:#F2C79A; --card:#1C2B4D; }
   }
   * { box-sizing:border-box; }
   body { margin:0; background:var(--bg); color:var(--ink); font:18px/1.55 -apple-system, "Segoe UI", Arial, sans-serif; }
   main { max-width:640px; margin:0 auto; padding:64px 16px 48px; }
   h1 { font-family:Georgia, "Times New Roman", serif; font-size:clamp(30px, 6vw, 42px); line-height:1.15; margin:0 0 20px; }
+  h2 { font-size:15px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:36px 0 12px; }
   p { margin:0 0 16px; color:var(--muted); }
   .lead { font-size:20px; color:var(--ink); }
   .free { color:var(--accent); font-weight:600; }
+  .links { display:grid; gap:12px; }
+  .links a { display:block; background:var(--card); border:1px solid var(--rule); border-radius:10px; padding:16px 18px; color:var(--ink); text-decoration:none; }
+  .links a:hover, .links a:focus-visible { border-color:var(--accent); }
+  .links a:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  .links b { display:block; font-size:19px; }
+  .links span { display:block; color:var(--muted); font-size:16px; margin-top:2px; }
+  ul { margin:0 0 16px; padding-left:22px; color:var(--muted); }
+  li { margin-bottom:6px; }
   footer { border-top:1px solid var(--rule); margin-top:40px; padding-top:16px; font-size:15px; }
 </style>
 </head>
 <body>
 <main>
   <h1>Build your own digital chief of staff</h1>
-  <p class="lead">A free starter kit for setting up a digital chief of staff inside the AI tool your institution already approved. It's coming to this page soon.</p>
+  <p class="lead">An AI assistant that reads your calendar, your email and the quick notes on your phone, gives you a short brief each morning, and learns how you work. It runs in the AI tool your institution already approved.</p>
   <p class="free">Free. Nothing to buy, and nothing to install.</p>
+
+  <h2>See how it works</h2>
+  <div class="links">
+    <a href="how-it-works.html"><b>Walk-through</b><span>Twenty slides: what it catches, one morning step by step, where it's going, and how to set it up. Click or use the arrow keys.</span></a>
+    <a href="overview.html"><b>Short overview</b><span>Ten slides, if you only have a few minutes.</span></a>
+  </div>
+
+  <h2>Set it up</h2>
+  <div class="links">
+    <a href="https://drive.google.com/drive/folders/1tyyH66MHWwO6hU1mvH9YLJkd0jxPQpr0"><b>The kit folder</b><span>Opens in Google Drive. Start with README.md. Setup takes about an hour, once.</span></a>
+  </div>
+
+  <h2>Before you start</h2>
+  <ul>
+    <li>Use the AI tool your institution approved for your work, signed in with your work account.</li>
+    <li>No patient information. It's for administrative work.</li>
+    <li>It drafts. You decide what gets sent.</li>
+  </ul>
+
+  <p>This is a pilot. It works today, and it changes as people try it. Feedback is welcome.</p>
+
   <footer>
     <p>Peter Mosca works for a software company. This kit has no connection to it or to any AI company.</p>
   </footer>

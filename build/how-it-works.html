@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How a Morning Works</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* One 1280x720 stage: phone on the left, the AI assistant in the middle, email and calendar on the right. Each step lights up what moves. */
+:root{
+  --bg:#1b2220; --paper:#f6f7f5; --panel:#ffffff; --fg:#1d2522; --muted:#5d6a65; --line:#d5dcd8;
+  --accent:#2f7a5d; --accent-soft:#e4f2ec; --blue:#2f5d8a; --blue-soft:#e6eef6; --warn:#9a5b12; --warn-soft:#f8ecd9;
+  --new:#c2410c; --display:"Newsreader", Georgia, serif; --body:"Public Sans", system-ui, -apple-system, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);font-family:var(--body);color:var(--fg);overflow:hidden}
+#viewport{position:fixed;inset:0 0 64px;display:grid;place-items:center}
+#stage{width:1280px;height:720px;position:relative;transform-origin:center center;background:var(--paper);border-radius:6px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.piece{position:absolute;transition:opacity .35s, box-shadow .35s, transform .35s}
+.dim{opacity:.35}
+.lit{box-shadow:0 0 0 4px var(--accent), 0 12px 30px rgba(47,122,93,.25)}
+.label{position:absolute;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);transition:opacity .35s}
+/* phone */
+#phone{left:70px;top:120px;width:250px;height:470px;background:#111;border-radius:38px;padding:14px}
+#phone .scr{background:#fffdf5;border-radius:26px;height:100%;padding:18px 16px;font-size:12.5px;line-height:1.45;overflow:hidden}
+#phone .app{font-size:12px;color:#b08a1e;font-weight:700;margin-bottom:6px}
+#phone h4{margin:0 0 8px;font-size:16px}
+#phone .ln{padding:3px 0;border-bottom:1px solid #f0ead8}
+#phone .nn{margin-top:8px;font-weight:700;color:var(--muted)}
+#phone .new{background:var(--warn-soft);border-radius:4px;padding:2px 4px;margin-top:3px}
+#phone .fresh{animation:pop .5s ease}
+@keyframes pop{from{background:#ffe7a8}to{}}
+/* assistant */
+#bot{left:460px;top:90px;width:420px;height:540px;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+#bot .bar{background:#eef1ef;padding:10px 16px;font-weight:700;font-size:14px;display:flex;justify-content:space-between}
+#bot .bar span{font-weight:500;color:var(--muted)}
+#profile{margin:12px 14px 0;border:1px dashed var(--blue);background:var(--blue-soft);border-radius:10px;padding:10px 12px;font-size:12.5px;line-height:1.45;transition:box-shadow .35s, opacity .35s}
+#profile b{color:var(--blue);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:2px}
+#chat{flex:1;padding:12px 14px;display:flex;flex-direction:column;gap:8px;font-size:12.5px;line-height:1.45;overflow:hidden}
+.msg{border-radius:12px;padding:8px 11px;max-width:92%;animation:in .4s ease}
+.me{align-self:flex-end;background:var(--accent);color:#fff}
+.me .paste{background:rgba(255,255,255,.18);border-radius:6px;padding:5px 7px;margin-top:5px;font-size:11.5px}
+.ai{align-self:flex-start;background:#f1f3f2}
+.ai b{color:var(--accent);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.ai .list{background:#fff;border:1px solid var(--line);border-radius:6px;padding:5px 7px;margin-top:4px;font-size:11.5px}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* sources */
+.src{width:200px;height:140px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:12.5px;line-height:1.5}
+.src h4{margin:0 0 6px;font-size:16px}
+#mail{left:1010px;top:150px}
+#cal{left:1010px;top:400px}
+.plug{position:absolute;font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-soft);border-radius:999px;padding:2px 8px}
+/* arrows */
+svg#arrows{position:absolute;inset:0;pointer-events:none}
+.arr{stroke:var(--accent);stroke-width:4;fill:none;stroke-dasharray:10 8;opacity:0;transition:opacity .3s}
+.arr.on{opacity:1;animation:flow 1s linear infinite}
+.arrtxt{font:700 13px var(--body);fill:var(--accent);opacity:0;transition:opacity .3s}
+.arrtxt.on{opacity:1}
+@keyframes flow{to{stroke-dashoffset:-36}}
+/* caption */
+#cap{position:absolute;left:0;right:0;bottom:0;height:86px;background:var(--fg);color:#fff;display:flex;align-items:center;gap:22px;padding:0 40px}
+#cap .n{font-family:var(--display);font-size:40px;color:#9fd8bf;min-width:60px}
+#cap .t{font-size:22px;font-weight:600;line-height:1.25}
+#cap .s{font-size:15px;color:#c9d6d0;font-weight:400;margin-top:3px}
+#nav{position:fixed;left:0;right:0;bottom:16px;display:flex;justify-content:center;gap:12px;align-items:center;font:600 14px var(--body);color:#cfd8d4}
+#nav button{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:7px 16px;font:600 14px var(--body);cursor:pointer}
+#nav button:focus-visible{outline:2px solid #7cc7a6;outline-offset:2px}
+#aha{position:absolute;inset:0;background:var(--paper);display:none;grid-template-columns:430px 1fr;gap:48px;padding:56px 64px 40px;z-index:5}
+#aha.on{display:grid;align-content:center}
+#aha .kick{font-size:15px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+#aha h1{font-family:var(--display);font-weight:600;font-size:50px;line-height:1.05;margin:10px 0 22px;text-wrap:balance}
+#aha .before{font-size:18px;line-height:1.45;color:var(--muted);border-left:3px solid var(--line);padding-left:14px}
+#aha .before b{display:block;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+#aha .foot2{margin-top:26px;font-size:20px;font-weight:700}
+#aha .ahaR{display:grid;gap:10px;align-content:start;background:#eef1ef;border:1px solid var(--line);border-radius:16px;padding:16px 18px 18px}
+#aha .briefhead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-weight:700;font-size:17px;padding:0 2px 4px}
+#aha .briefhead .from{font-weight:500;font-size:13.5px;color:var(--muted)}
+.card2{display:grid;grid-template-columns:118px 1fr;gap:14px;align-items:start;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;font-size:16px;line-height:1.4;animation:in .5s ease both}
+.card2:nth-child(3){animation-delay:.15s}.card2:nth-child(4){animation-delay:.3s}.card2:nth-child(5){animation-delay:.45s}.card2:nth-child(6){animation-delay:.6s}.card2:nth-child(7){animation-delay:.75s}
+.tag2{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:999px;padding:4px 10px;text-align:center}
+.tag2.c{background:var(--warn-soft);color:var(--warn)} .tag2.r{background:var(--accent-soft);color:var(--accent)} .tag2.s{background:#f6e3e1;color:#9b3328} .tag2.l{background:var(--blue-soft);color:var(--blue)}
+@media (prefers-reduced-motion:reduce){.card2{animation:none}}
+#knows{position:absolute;inset:0;background:var(--paper);display:none;flex-direction:column;justify-content:center;gap:18px;padding:40px 72px;z-index:6}
+#knows.on{display:flex}
+#knows .kick{font-size:15px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+#knows h1{font-family:var(--display);font-weight:600;font-size:46px;line-height:1.05;margin:0 0 6px}
+.krows{display:grid;gap:12px}
+.krow{display:grid;grid-template-columns:300px 60px 1fr;align-items:center}
+.jot{background:#fff6d6;border:1px solid #eedc9a;border-radius:8px;padding:14px 18px;font-size:22px;font-family:"Bradley Hand","Segoe Print","Comic Sans MS",cursive;color:#5b4a12;animation:in .5s ease both;animation-delay:var(--d)}
+.karr{text-align:center;font-size:30px;color:var(--accent);animation:in .4s ease both;animation-delay:calc(var(--d) + .4s)}
+.meant{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:10px 18px;font-size:18px;line-height:1.4;animation:in .5s ease both;animation-delay:calc(var(--d) + .6s)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.chips span{font-size:12.5px;font-weight:600;color:var(--blue);background:var(--blue-soft);border-radius:999px;padding:2px 10px}
+.learnstrip{display:grid;grid-template-columns:auto 1fr 40px 1fr;gap:16px;align-items:center;background:var(--blue-soft);border-radius:12px;padding:14px 20px;font-size:17px;line-height:1.4;margin-top:6px;animation:in .5s ease both;animation-delay:4s}
+.learnstrip .lt{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+.karr2{color:var(--blue);font-size:26px;text-align:center}
+.hl{background:#ffe7a8;border-radius:3px;padding:0 2px}
+@media (prefers-reduced-motion:reduce){.jot,.karr,.meant,.learnstrip{animation:none}}
+.ov{position:absolute;inset:0 0 86px 0;background:var(--paper);display:none;flex-direction:column;justify-content:center;gap:16px;padding:40px 70px;z-index:7}
+.roadcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 26px 8px}
+.ov.on{display:flex}
+#road.ov{padding-top:70px}
+.ov .kick{font-size:15px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.ov h1{font-family:var(--display);font-weight:600;font-size:46px;line-height:1.05;margin:0 0 8px}
+.need{display:inline-block;font-size:13px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.need.n0{background:var(--accent-soft);color:var(--accent)} .need.n1{background:var(--blue-soft);color:var(--blue)} .need.n2{background:var(--warn-soft);color:var(--warn)}
+.fgrid{display:grid;grid-template-columns:240px 50px 1fr 50px 210px;align-items:center}
+.fbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;gap:8px;justify-items:start;font-size:15.5px;line-height:1.45}
+.fbox h4{margin:0;font-size:18px}
+.fbox p{margin:0;color:var(--muted)}
+.fbox.big{border:2px solid var(--accent);gap:10px}
+.clock{font-family:var(--display);font-size:24px;font-weight:600}
+.fmem,.fbrief{background:#f4f6f5;border-radius:8px;padding:10px 12px;width:100%;display:grid;gap:4px;justify-items:start}
+.fmem b,.fbrief b{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.ok{color:var(--accent);font-weight:600}
+.farr{text-align:center;font-size:30px;color:var(--accent)}
+.srcs{display:grid;gap:10px}
+.fsrc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-weight:600;font-size:16px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.fsrc.new{border-style:dashed}
+table.road{border-collapse:collapse;width:100%;font-size:18px}
+table.road th{text-align:left;font-size:13px;letter-spacing:.08em;text-transform:uppercase;padding:0 12px 8px 0}
+table.road th.k{color:var(--accent)} table.road th.f{color:var(--blue)}
+table.road td{padding:10px 12px 10px 0;border-top:1px solid var(--line);vertical-align:middle}
+table.road td:first-child{font-weight:600}
+table.road td.ar{color:var(--accent);font-size:22px;width:36px}
+table.road td:last-child{width:150px}
+.fx{display:none}
+.sametag{display:none;font-size:13px;color:var(--muted);font-weight:600}
+#stage.fut .sametag{display:inline-block}
+#stage.fut #mail,#stage.fut #cal{opacity:.6}
+#stage.fut #meet,#stage.fut #chats,#stage.fut #botbar,#stage.fut #connnew{outline:3px dashed var(--new);outline-offset:5px}
+#stage.fut #profile,#stage.fut #botbar{position:relative}
+#stage.fut #labConn{top:84px!important}
+#stage.fut #meet::after,#stage.fut #chats::after,#stage.fut #botbar::after,#stage.fut #connnew::after{content:"NEW";position:absolute;top:-14px;right:-12px;background:var(--new);color:#fff;font:700 11px var(--body);letter-spacing:.08em;padding:3px 8px;border-radius:999px;z-index:3}
+#stage.fut #botbar{overflow:visible}
+#bot{overflow:visible}
+#connnew{position:absolute;left:334px;top:300px;width:122px;text-align:center;font-size:13px;font-weight:700;color:var(--accent);background:var(--paper);border-radius:8px;padding:6px 4px;z-index:4}
+#stage.fut #connnew{display:block}
+.nwin{outline:2px dashed var(--new);outline-offset:3px;border-radius:6px;padding:2px 4px;margin:13px 0 6px;position:relative}
+.nwin::after{content:attr(data-new);white-space:nowrap;position:absolute;top:-10px;right:-8px;background:var(--new);color:#fff;font:700 10px var(--body);letter-spacing:.08em;padding:2px 6px;border-radius:999px}
+#futbanner{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:8;display:none;align-items:baseline;gap:12px;background:var(--blue);color:#fff;font-weight:700;font-size:20px;padding:6px 22px;border-radius:999px;white-space:nowrap}
+#futbanner span{font-weight:500;font-size:14px;color:#dbe7f3}
+#stage.fut #futbanner,#stage.roadon #futbanner{display:flex}
+#stage.fut .fx{display:block}
+#stage.fut .src{height:105px;padding:12px 16px}
+#stage.fut .src .sub{display:none}
+#stage.fut #mail{top:110px} #stage.fut #cal{top:230px}
+#meet{left:1010px;top:350px} #chats{left:1010px;top:470px}
+.src .need{margin-top:4px}
+.memln{padding-left:12px;position:relative}
+.memln::before{content:"•";position:absolute;left:0;color:var(--blue)}
+#botbar .need{margin-left:8px}
+#cmp.ov{padding:34px 60px}
+.cmpgrid{display:grid;grid-template-columns:170px 1fr 1fr 1fr;column-gap:12px}
+.ch{border-radius:12px 12px 0 0;padding:12px 16px;font-weight:700;font-size:17px;color:#fff;display:flex;flex-direction:column}
+.ch span{font-weight:500;font-size:13px;opacity:.85}
+.ch.c1{background:var(--accent)} .ch.c2{background:var(--blue)} .ch.c3{background:#5d6a65}
+.rl{font-weight:700;font-size:14px;padding:11px 0;border-bottom:1px solid var(--line);display:flex;align-items:center}
+.cc{background:var(--panel);font-size:15px;line-height:1.35;padding:11px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center}
+.cc.k{border-left:3px solid var(--accent)} .cc.f{border-left:3px solid var(--blue)} .cc.m{border-left:3px solid #5d6a65}
+.cc.last{border-radius:0 0 12px 12px;border-bottom:1px solid var(--line)}
+.rl.last{border-bottom:none}
+.same{color:var(--muted);font-weight:600}
+.tl{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;position:relative}
+.tl::before{content:"";position:absolute;left:8%;right:8%;top:34px;height:3px;background:var(--accent-soft)}
+.tls{display:grid;justify-items:center;text-align:center;gap:10px;position:relative}
+.tln{width:68px;height:68px;border-radius:50%;background:var(--accent);color:#fff;font-family:var(--display);font-size:32px;font-weight:600;display:grid;place-items:center;box-shadow:0 0 0 6px var(--paper)}
+.tlt{font-weight:700;font-size:18px;line-height:1.25}
+.tlm{font-size:14px;font-weight:600;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:2px 10px}
+.tltotal{margin-top:34px;text-align:center;font-family:var(--display);font-size:28px;font-weight:600}
+#inst2.ov{padding:26px 48px}
+.ig{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.ic{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:6px;align-content:start;font-size:15px;line-height:1.42}
+.ich{display:flex;align-items:center;gap:8px;font-weight:700;font-size:17px}
+.icn{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:13px;flex:none}
+.icm{margin-left:auto;font-size:12px;color:var(--accent);font-weight:600}
+.icf{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--blue);background:var(--blue-soft);border-radius:6px;padding:3px 8px;justify-self:start}
+.icd{color:var(--fg)}
+.icdone{color:var(--accent);font-weight:600;border-top:1px solid var(--line);padding-top:6px}
+.ov.dd{padding:24px 44px}
+.ddg{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.ddc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 18px;display:grid;gap:8px}
+.ddh{display:flex;align-items:center;gap:10px;font-weight:700;font-size:19px}
+.dev{margin-left:auto;font-size:12.5px;font-weight:700;color:var(--blue);background:var(--blue-soft);border-radius:999px;padding:3px 10px;white-space:nowrap}
+.ddc ol{margin:0;padding-left:22px;display:grid;gap:6px;font-size:14.5px;line-height:1.42}
+.ddc ol li::marker{color:var(--accent);font-weight:700}
+.dv{display:inline-block;font-size:11.5px;font-weight:700;border-radius:999px;padding:1px 8px;margin-right:7px;vertical-align:1px}
+.dv.ph{background:#efe6f8;color:#6b3fa0} .dv.pc{background:var(--blue-soft);color:var(--blue)}
+.every{font-size:14px;font-weight:600;color:var(--fg)}
+.kb{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:#eef1ef;border-radius:4px;padding:0 4px}
+#divider{position:absolute;inset:0;background:var(--accent);color:#fff;display:none;flex-direction:column;justify-content:center;padding:0 110px;z-index:9}
+#divider.on{display:flex}
+#divider .dkick{font-size:16px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#cfeee0}
+#divider h1{font-family:var(--display);font-weight:600;font-size:84px;line-height:1;margin:14px 0 22px}
+#divider p{font-size:26px;color:#e9f6f0;margin:0;max-width:30ch;line-height:1.35}
+.trygrid{display:grid;grid-template-columns:1fr 340px;gap:60px;align-items:center}
+#tryit .kick{margin-bottom:10px}
+#tryit p{font-size:22px;line-height:1.4;color:var(--muted);margin:0 0 22px;max-width:32ch}
+.tryurl{font-family:var(--display);font-size:40px;font-weight:600;color:var(--accent)}
+.qrbox{background:#ece7dd;border-radius:16px;padding:20px;display:grid;place-items:center}
+.qrbox svg{width:300px;height:300px;display:block}
+.promise{background:var(--accent-soft);border-radius:10px;padding:14px 18px;font-size:17px;line-height:1.45;margin-top:4px}
+@media (prefers-reduced-motion:reduce){.arr.on{animation:none}.msg,#phone .fresh{animation:none}}
+
+table.road td.today{color:var(--muted);font-weight:500}
+table.road td.grow{color:var(--fg);font-weight:600;background:var(--blue-soft)}
+table.road tr:first-child th.f{background:var(--blue-soft);padding-left:12px}
+table.road td.grow{padding-left:12px}
+table.road td:last-child,table.road th:last-child{padding-left:14px}
+
+.rm{display:grid;gap:10px;width:100%}
+.rmhead,.rmrow{display:grid;grid-template-columns:290px 40px 1fr 160px;align-items:center;column-gap:14px}
+.rmhead{padding:0 22px 2px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.rmhead .hg{color:var(--blue)}
+.rmrow{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 22px}
+.rmt{color:var(--muted);font-size:17px;line-height:1.35}
+.rma{color:var(--accent);font-size:24px;text-align:center}
+.rmg{color:var(--fg);font-size:18px;font-weight:600;line-height:1.35}
+.rmc{justify-self:start}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+
+  <div id="futbanner">Where it's going <span>Future capabilities, not what you set up today</span></div>
+  <div class="label" id="labPhone" style="left:70px;top:88px">Your phone</div>
+  <div class="label" style="left:460px;top:62px">Your AI assistant (any chatbot app)</div>
+  <div class="label" id="labConn" style="left:1010px;top:118px">Connected</div>
+
+  <div id="phone" class="piece"><div class="scr" id="phonescr">
+    <div class="app">Notes · pinned</div>
+    <h4>Digital to-do list</h4>
+    <div id="notelist">
+      <div class="ln">Send survey link to Omar · due Wed</div>
+      <div class="ln">Reply to Raj on sim lab · due Wed</div>
+      <div class="ln">Interviewer list to Tasha · due Thu</div>
+    </div>
+    <div class="nn">New notes:</div>
+    <div id="newnotes">
+      <div class="new">Omar link, done</div>
+      <div class="new">told K summary by Fri</div>
+      <div class="new">T agenda before Thu</div>
+      <div class="new">Raj??</div>
+    </div>
+  </div></div>
+
+  <div id="bot" class="piece">
+    <div class="bar" id="botbar">New chat <span>Chief of staff</span></div>
+    <div id="profile"><b id="profhead">Saved in settings · your profile</b><div id="proftext">Residency program director. Works with Tasha (coordinator), Omar (chief resident), Dr. Kowalski (chair)…</div></div>
+    <div id="chat"></div>
+  </div>
+
+  <div id="mail" class="piece src"><h4>✉ Email</h4><span class="sametag">Same as today</span><span class="sub">Gmail or Outlook<br><span style="color:var(--muted)">read each morning, nothing copied</span></span></div>
+  <div id="cal" class="piece src"><h4>▦ Calendar</h4><span class="sametag">Same as today</span><span class="sub">Google or Outlook<br><span style="color:var(--muted)">today and tomorrow</span></span></div>
+  <div id="meet" class="piece src fx"><h4>◉ Meetings</h4><span style="color:var(--muted)">Summaries and transcripts</span></div>
+  <div id="chats" class="piece src fx"><h4>☰ Chats</h4><span style="color:var(--muted)">Slack, Teams</span></div>
+  <div id="connnew" class="fx">reads and updates<br><span class="need n1">A connection</span></div>
+
+  <svg id="arrows" viewBox="0 0 1280 720">
+    <path id="aPaste" class="arr" d="M325 330 C 390 330, 400 420, 470 430"/>
+    <text id="tPaste" class="arrtxt" x="336" y="318">paste</text>
+    <path id="aProfile" class="arr" d="M890 150 C 950 150, 950 300, 885 300"/>
+    <text id="tProfile" class="arrtxt" x="905" y="140">reads</text>
+    <path id="aMail" class="arr" d="M1005 220 C 950 230, 930 330, 885 350"/>
+    <text id="tMail" class="arrtxt" x="928" y="262">reads</text>
+    <path id="aCal" class="arr" d="M1005 470 C 950 460, 930 410, 885 400"/>
+    <text id="tCal" class="arrtxt" x="928" y="470">reads</text>
+    <path id="aBack" class="arr" d="M455 540 C 400 540, 390 450, 325 440"/>
+    <text id="tBack" class="arrtxt" x="340" y="560">copy back</text>
+    <path id="aFList" class="arr" d="M325 360 C 390 360, 400 420, 470 420"/>
+    <text id="tFList" class="arrtxt" x="0" y="0"></text>
+    <path id="aFMail" class="arr" d="M1005 150 C 950 160, 930 300, 885 310"/>
+    <text id="tFMail" class="arrtxt" x="0" y="0"></text>
+    <path id="aFCal" class="arr" d="M1005 270 C 960 280, 930 335, 885 340"/>
+    <text id="tFCal" class="arrtxt" x="0" y="0"></text>
+    <path id="aFMeet" class="arr" d="M1005 395 C 960 395, 930 370, 885 370"/>
+    <text id="tFMeet" class="arrtxt" x="0" y="0"></text>
+    <path id="aFChats" class="arr" d="M1005 520 C 950 510, 930 410, 885 400"/>
+    <text id="tFChats" class="arrtxt" x="0" y="0"></text>
+    <path id="aLearn" class="arr" d="M885 560 C 980 560, 990 170, 890 165"/>
+    <text id="tLearn" class="arrtxt" x="955" y="600">you add "Learned"</text>
+  </svg>
+
+  <div id="road" class="ov">
+    <div class="rm">
+      <div class="rmhead"><span>Today</span><span></span><span class="hg">Grows into</span><span>What it takes</span></div>
+      <div class="rmrow"><div class="rmt">Your profile and the "Learned" lines</div><div class="rma">→</div><div class="rmg">Memory of how your people work and what each season brings, so it looks ahead</div><div class="rmc"><span class="need n0">No new setup</span></div></div>
+      <div class="rmrow"><div class="rmt">A to-do note you copy in and out</div><div class="rma">→</div><div class="rmg">A connected list that tracks what's open, done and going stale</div><div class="rmc"><span class="need n1">A connection</span></div></div>
+      <div class="rmrow"><div class="rmt">You ask for the brief</div><div class="rma">→</div><div class="rmg">The brief is waiting when you wake up</div><div class="rmc"><span class="need n1">A tool feature</span></div></div>
+      <div class="rmrow"><div class="rmt">You check the drafts</div><div class="rma">→</div><div class="rmg">It checks every fact in a draft before you see it</div><div class="rmc"><span class="need n0">No new setup</span></div></div>
+      <div class="rmrow"><div class="rmt">Email and calendar</div><div class="rma">→</div><div class="rmg">Plus meetings and chats</div><div class="rmc"><span class="need n2">IT approval</span></div></div>
+    </div>
+  </div>
+
+  <div id="cmp" class="ov">
+    <div class="cmpgrid">
+      <div></div>
+      <div class="ch c1">Your chief of staff<span>today</span></div>
+      <div class="ch c2">Your chief of staff<span>where it's going</span></div>
+      <div class="ch c3">Consumer AI agents<span>like Meta's Muse</span></div>
+      <div class="rl">Built for</div><div class="cc k">Your work day: meetings, email, promises</div><div class="cc f">Your work day, looking ahead</div><div class="cc m">Your personal life: errands, shopping, calls</div>
+      <div class="rl">Runs in</div><div class="cc k">The AI tool your institution approved</div><div class="cc f"><span class='same'>Same</span></div><div class="cc m">A free app on a personal account</div>
+      <div class="rl">Starts</div><div class="cc k">You ask each morning</div><div class="cc f">Ready before you wake</div><div class="cc m">Runs on its own</div>
+      <div class="rl">Takes action</div><div class="cc k">Drafts. You send.</div><div class="cc f"><span class='same'>Same</span></div><div class="cc m">Sends, buys and calls for you, asking first</div>
+      <div class="rl">Memory</div><div class="cc k">A profile you read and approve, line by line</div><div class="cc f">Months of approved memory, so it looks ahead</div><div class="cc m">Memory the app keeps. You don't always see what it saved.</div>
+      <div class="rl">Work and patient info</div><div class="cc k">Only what your institution allows</div><div class="cc f"><span class='same'>Same</span></div><div class="cc m">Not cleared for it: no HIPAA statement, no work-account link</div>
+      <div class="rl last">Your data</div><div class="cc k last">Covered by your institution's agreement</div><div class="cc f last"><span class='same'>Same</span></div><div class="cc m last">Trains the company's AI unless you turn that off</div>
+    </div>
+  </div>
+
+  <div id="inst1" class="ov"><div class="tl">
+      <div class="tls"><div class="tln">1</div><div class="tlt">Open the kit folder</div><div class="tlm">2 min</div></div>
+      <div class="tls"><div class="tln">2</div><div class="tlt">Let it interview you</div><div class="tlm">15 min</div></div>
+      <div class="tls"><div class="tln">3</div><div class="tlt">Save the instructions</div><div class="tlm">15 min</div></div>
+      <div class="tls"><div class="tln">4</div><div class="tlt">Practice on the sample week</div><div class="tlm">15 min</div></div>
+      <div class="tls"><div class="tln">5</div><div class="tlt">Connect email and calendar</div><div class="tlm">10 min</div></div>
+      <div class="tls"><div class="tln">6</div><div class="tlt">Make your first brief</div><div class="tlm">10 min</div></div>
+    </div>
+    <div class="tltotal">About an hour, once. Then about ten minutes each morning.</div>
+  </div>
+
+  <div id="inst2" class="ov"><div class="ig">
+      <div class="ic"><div class="ich"><span class="icn">1</span>Open the kit folder<span class="icm">2 min</span></div><div class="icf">Google Drive link · README.md</div><div class="icd">Open the shared folder in your browser and read README.md. Keep it next to your AI assistant: in each step you copy a box from a kit file into the chat.</div><div class="icdone">✓ Two windows open: the kit folder and your assistant.</div></div>
+      <div class="ic"><div class="ich"><span class="icn">2</span>Let it interview you<span class="icm">15 min</span></div><div class="icf">start/1-profile-interview.md</div><div class="icd">Paste the box into a new chat and answer about ten questions. Fix the profile it writes, and save it somewhere private.</div><div class="icdone">✓ You have a half-page profile that sounds like you.</div></div>
+      <div class="ic"><div class="ich"><span class="icn">3</span>Save the instructions<span class="icm">15 min</span></div><div class="icf">start/2-standing-instructions.md</div><div class="icd">Paste the rules, then your profile, into your assistant's saved instructions. setup/any-assistant.md shows where.</div><div class="icdone">✓ Ask "What are your rules, and who am I?" It answers correctly.</div></div>
+      <div class="ic"><div class="ich"><span class="icn">4</span>Practice on the sample week<span class="icm">15 min</span></div><div class="icf">sample-week/README.md</div><div class="icd">In a new chat, use the second box in start/3-daily-brief.md with the sample calendar, emails and note.</div><div class="icdone">✓ It caught the four traps in answer-key.md.</div></div>
+      <div class="ic"><div class="ich"><span class="icn">5</span>Connect email and calendar<span class="icm">10 min</span></div><div class="icf">setup/any-assistant.md</div><div class="icd">Follow the vendor help link at the end. Connect only an account your institution allows.</div><div class="icdone">✓ Ask "What's on my calendar today?" It knows.</div></div>
+      <div class="ic"><div class="ich"><span class="icn">6</span>Make your first brief<span class="icm">10 min</span></div><div class="icf">start/3-daily-brief.md</div><div class="icd">Use the first box. Make a pinned phone note called "Digital to-do list" and paste in the list the brief ends with.</div><div class="icdone">✓ The brief's first line names the calendars and mailbox it checked.</div></div>
+    </div></div>
+
+  <div id="inst3" class="ov dd"><div class="ddg">
+      <div class="ddc"><div class="ddh"><span class="icn">1</span>Open the kit folder<span class="dev">On your computer</span></div><ol><li>Open the Google Drive link you were sent, in your web browser.</li><li>Click <b>README.md</b>. Drive shows it as plain text. Read it; it takes two minutes.</li><li>In a second window, open your AI assistant and sign in with the account you'll use for this: its website or its desktop app.</li><li>Put the two windows side by side. You'll copy from the left and paste on the right.</li></ol><div class="icdone">✓ Both windows are open, and you know the three rules.</div></div>
+      <div class="ddc"><div class="ddh"><span class="icn">2</span>Let it interview you<span class="dev">On your computer</span></div><ol><li>In the kit folder, open <b>start/1-profile-interview.md</b>.</li><li>Find the box: the text between the two lines that read <span class='kb'>```</span>. Select it all and copy it.</li><li>In your assistant, start a new chat, paste, and send.</li><li>Answer its questions one at a time, about ten. Typing or talking both work.</li><li>When it shows your profile, tell it what's wrong until it's right.</li><li>Copy the finished profile into a private document of your own, such as a Google Doc, Word file or note. Not in the kit folder.</li></ol><div class="icdone">✓ You have a half-page profile that sounds like you.</div></div>
+    </div></div>
+
+  <div id="inst4" class="ov dd"><div class="ddg">
+      <div class="ddc"><div class="ddh"><span class="icn">3</span>Save the instructions<span class="dev">On your computer</span></div><ol><li>Open <b>start/2-standing-instructions.md</b> and copy the text in its box.</li><li>In your private document, paste the rules at the top, above your profile. Rules plus profile is your <b>setup text</b>.</li><li>Paste your setup text where your assistant keeps saved instructions: a <b>project</b> in ChatGPT or Claude, <b>custom instructions</b> in Copilot, a <b>Gem</b> in Gemini. <b>setup/any-assistant.md</b> links each vendor's help page.</li><li>No such place? Paste your setup text at the start of each morning's chat instead.</li><li>Start a new chat in that same place and ask: <i>What are your rules, and who am I?</i></li></ol><div class="icdone">✓ It lists the seven rules and describes you.</div></div>
+      <div class="ddc"><div class="ddh"><span class="icn">4</span>Practice on the sample week<span class="dev">On your computer</span></div><ol><li>Start a <b>plain</b> new chat, outside your project or Gem. This week belongs to a made-up program director.</li><li>Paste the rules from step 3, then <b>sample-week/profile.md</b>.</li><li>Open <b>start/3-daily-brief.md</b> and copy the <b>second</b> box. Change [day and date] to <i>Tuesday, November 3, 2026</i>.</li><li>Replace its three [paste] spots with <b>calendar.md</b>, <b>emails.md</b> and <b>hallway-notes.md</b> from sample-week. Send.</li><li>Compare the brief with <b>sample-week/answer-key.md</b>. Don't paste the answer key into the chat.</li></ol><div class="icdone">✓ It caught the canceled meeting, the dates that disagree, the missing template and the planted instruction.</div></div>
+    </div></div>
+
+  <div id="inst5" class="ov dd"><div class="ddg">
+      <div class="ddc"><div class="ddh"><span class="icn">5</span>Connect email and calendar<span class="dev">On your computer</span></div><ol><li>Open <b>setup/any-assistant.md</b> and scroll to the end. Click the help link for your assistant.</li><li>Follow that page's steps. Connect only an account your institution allows; a work account may need IT to switch it on.</li><li>Using Copilot with your work account? It already sees your Outlook mail and calendar.</li><li>Not allowed yet? Skip this step. You can paste your calendar and emails instead, using the second box.</li></ol><div class="icdone">✓ Ask <i>What's on my calendar today?</i> It knows.</div></div>
+      <div class="ddc"><div class="ddh"><span class="icn">6</span>Your first brief and your phone note<span class="dev">Phone and computer</span></div><ol><li><span class="dv ph">Phone</span>In the Notes app, make a note called <i>Digital to-do list</i> and pin it.</li><li><span class="dv ph">Phone</span>Add any hallway notes under <i>New notes:</i>. Then copy the whole note.</li><li><span class="dv pc">Computer</span>Start a new chat in your project or Gem. Copy the <b>first</b> box of <b>start/3-daily-brief.md</b> and put in today's date.</li><li><span class="dv pc">Computer</span>Paste your note in place of <span class='kb'>[paste]</span> at the bottom, and send. Phone and computer not both Apple? Do steps 3 to 5 in the assistant's phone app instead.</li><li><span class="dv pc">Computer</span>Check the brief's first line: it names the calendars and mailbox it checked.</li><li><span class="dv ph">Phone</span>Open the same chat in the assistant's phone app, copy the to-do list at the end, and replace your note's text with it. Work phone won't paste into Notes? Keep the note in OneNote instead.</li></ol><div class="every">Every morning after: steps 2 to 6.</div><div class="icdone">✓ Your brief is on screen and your note holds the updated list.</div></div>
+    </div></div>
+
+  <div id="divider"><div class="dkick">Part two</div><h1>Setting it up</h1><p>Six steps, about an hour, once. Here's what you do, and where.</p></div>
+
+  <div id="tryit" class="ov"><div class="trygrid"><div><div class="kick">Try it yourself</div><h1>Everything is in one place.</h1><p>The kit folder with every file in these steps, this walk-through, and a short video.</p><div class="tryurl">petermosca.com/build</div></div><div class="qrbox"><svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 660 660" class="segno"><g transform="scale(20)"><path fill="#ece7dd" d="M0 0h33v33h-33z"/><path class="qrline" stroke="#14213d" d="M2 2.5h7m5 0h2m1 0h4m3 0h7m-29 1h1m5 0h1m1 0h4m1 0h1m2 0h1m2 0h2m1 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m2 0h1m1 0h1m2 0h3m1 0h3m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h2m4 0h4m1 0h1m2 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m2 0h3m1 0h1m1 0h3m2 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m7 0h1m2 0h1m2 0h1m1 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-21 1h2m2 0h1m1 0h2m2 0h2m-19 1h1m1 0h4m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h2m1 0h2m1 0h2m1 0h1m-28 1h5m8 0h4m1 0h2m4 0h1m1 0h2m-26 1h1m3 0h3m2 0h3m1 0h3m3 0h2m1 0h3m-27 1h1m2 0h1m7 0h2m1 0h4m10 0h1m-28 1h1m2 0h1m1 0h1m1 0h1m1 0h2m3 0h1m4 0h3m2 0h1m1 0h1m-28 1h1m1 0h1m6 0h1m1 0h1m1 0h2m1 0h1m5 0h1m1 0h1m1 0h1m1 0h1m-27 1h1m1 0h1m1 0h3m3 0h1m5 0h2m3 0h1m1 0h1m2 0h1m-29 1h1m3 0h1m4 0h2m3 0h3m1 0h1m1 0h2m2 0h4m-27 1h1m1 0h1m1 0h2m4 0h3m3 0h2m1 0h1m2 0h1m1 0h1m1 0h1m-28 1h2m1 0h2m3 0h1m1 0h2m2 0h1m2 0h4m3 0h3m-27 1h2m2 0h1m1 0h4m2 0h1m1 0h1m1 0h1m1 0h2m5 0h1m2 0h1m-29 1h2m1 0h2m3 0h3m1 0h2m1 0h2m1 0h2m1 0h3m2 0h1m-27 1h2m3 0h3m2 0h1m1 0h1m4 0h1m1 0h8m-19 1h1m1 0h2m1 0h1m1 0h1m1 0h4m3 0h3m-27 1h7m6 0h4m2 0h2m1 0h1m1 0h1m1 0h1m-27 1h1m5 0h1m1 0h3m2 0h1m1 0h1m2 0h3m3 0h2m1 0h1m-28 1h1m1 0h3m1 0h1m1 0h2m2 0h3m2 0h1m1 0h6m2 0h2m-29 1h1m1 0h3m1 0h1m1 0h6m3 0h2m4 0h1m1 0h3m-28 1h1m1 0h3m1 0h1m2 0h1m1 0h1m2 0h2m4 0h2m1 0h2m1 0h3m-29 1h1m5 0h1m1 0h1m3 0h1m3 0h1m2 0h1m2 0h1m1 0h3m1 0h1m-29 1h7m2 0h1m2 0h1m2 0h1m3 0h6"/></g></svg>
+</div></div></div>
+
+  <div id="knows">
+    <div class="kick">What makes it different</div>
+    <h1>It figures out what you mean. And it learns.</h1>
+    <div class="krows">
+      <div class="krow" style="--d:.2s"><div class="jot">told K summary by Fri</div><div class="karr">→</div><div class="meant">Send <b>Dr. Kowalski</b>, your department chair, the summary by <b>Friday, Nov 6</b>.<div class="chips"><span>context: your profile</span></div></div></div>
+      <div class="krow" style="--d:1.4s"><div class="jot">T agenda before Thu</div><div class="karr">→</div><div class="meant">The agenda for your <b>7:30 check-in with Tasha on Thursday</b>.<div class="chips"><span>context: your profile</span><span>context: your calendar</span></div></div></div>
+      <div class="krow" style="--d:2.6s"><div class="jot">Raj??</div><div class="karr">→</div><div class="meant"><b>Raj</b> is still waiting for your pick: Nov 13 or Nov 17. It's been on your list <b>since Monday</b>, and he releases both slots <b>Wednesday</b>.<div class="chips"><span>history: your list since Monday</span><span>context: Raj's email</span></div></div></div>
+    </div>
+    <div class="learnstrip"><span class="lt">It learns</span><div><b>Day 1:</b> "K is probably Dr. Kowalski. Should I remember that?" You say yes, once.</div><div class="karr2">→</div><div><b>Every day after:</b> it just knows. Next it learns T, your OR days, the meetings you skip.</div></div>
+  </div>
+
+  <div id="aha">
+    <div class="ahaL">
+      <div class="kick">7:00 a.m.</div>
+      <h1>Everything that matters today, on one screen.</h1>
+      <div class="before"><b>Instead of</b>46 unread emails, four calendars, and the promises you made in hallways and half remember.</div>
+      <div class="foot2">It drafts the replies. You decide, and you send.</div>
+    </div>
+    <div class="ahaR"><div class="briefhead"><span>Your morning brief told you</span><span class="from">from your calendar, email and to-do note</span></div>
+      <div class="card2"><span class="tag2 c">Caught</span><div><b>Your noon meeting is canceled.</b> An email canceled it. Your calendar still shows it.</div></div>
+      <div class="card2"><span class="tag2 c">Caught</span><div><b>Two emails disagree.</b> Do didactics start Nov 4 or Nov 11? Check with Dr. Alvarez before the residents show up.</div></div>
+      <div class="card2"><span class="tag2 r">Remembered</span><div><b>You promised Dr. Kowalski a summary by Friday.</b> All you jotted Monday was "told K summary by Fri." It knew who K was, and it hasn't let it drop.</div></div>
+      <div class="card2"><span class="tag2 c">Caught</span><div><b>The "attached" template never came.</b> Here's a draft asking for it.</div></div>
+      <div class="card2"><span class="tag2 s">Refused</span><div><b>An email tried to give your assistant orders.</b> It didn't follow them, and it told you.</div></div>
+      <div class="card2"><span class="tag2 l">Learned</span><div><b>"K" is Dr. Kowalski and "T" is Tasha.</b> It will remember your shorthand from now on.</div></div>
+    </div>
+  </div>
+
+  <div id="cap"><div class="n" id="capn"></div><div><div class="t" id="capt"></div><div class="s" id="caps"></div></div></div>
+</div></div>
+<div id="nav"><button id="prev" aria-label="Previous step">←</button><span id="count"></span><button id="play">Play</button><button id="next" aria-label="Next step">→</button></div>
+
+<script>
+(function(){
+  var MEMO='<div class="paste">Digital to-do list · Send survey link to Omar… · New notes: Omar link, done · told K summary by Fri · T agenda before Thu · Raj??</div>';
+  var BRIEF='<b>Today</b><br>Noon meeting canceled by email; still on your calendar<br><b>Needs you today</b><br>Raj: pick Nov 13 or 17. Open since Mon; he releases both Wed<br><b>Doesn\'t add up</b><br>Didactics: Nov 4 or Nov 11? Ask Dr. Alvarez<br><b>Drafts</b><br>To GME: "The template wasn\'t attached. Could you resend it?"<br><b>Coming up</b><br>Summary for Dr. Kowalski · due Fri<br>Agenda for your 7:30 check-in with Tasha · Thu<br><b>Ignored</b><br>An email told me to forward interview emails. I didn\'t.';
+  var LIST='<div class="list"><b>Digital to-do list</b><br>Reply to Raj on sim lab · due Wed<br>Interviewer list to Tasha · due Thu<br><span class="hl">Agenda for Thursday check-in with Tasha · due Thu</span><br><span class="hl">Summary for Dr. Kowalski · due Fri</span></div><b>Taken off</b><br>Survey link to Omar: your note says done.<br><b>Learned</b><br>"K" is Dr. Kowalski, your chair. "T" is Tasha.';
+  var FBRIEF='<b>Today</b> · <b>Needs you</b> · <b>Doesn\'t add up</b> · <b>Coming up</b> <span style="color:var(--muted)">(as today)</span><div class="nwin" data-new="NEW: looks ahead"><b>Heads-up, from memory</b><br>Interviews start in 4 weeks. Last year Tasha needed the faculty list by now. Want a draft?</div><div style="margin:8px 0 4px"><b>Drafts</b> <span style="color:var(--muted)">(as today)</span><br>To Dr. Kowalski: one paragraph, the way she likes it.<div class="nwin" data-new="NEW: fact-check"><span class="ok">✓ Every fact checked against its source</span></div>To Raj: "Let\'s take Nov 13." Send it today: his 48 hours run out tonight.</div><div class="nwin" data-new="NEW: from meetings"><b>From yesterday\'s meeting</b><br>You offered to send Omar the survey reminder.</div>';
+  var FPHONE='<div class="app" style="color:var(--blue)">Connected document</div><h4>Digital to-do list</h4><div class="ln">Reply to Raj on sim lab · due Wed</div><div class="ln">Agenda for Thursday check-in with Tasha · due Thu</div><div class="ln">Summary for Dr. Kowalski · due Fri</div><div class="ln" style="color:var(--accent)">Updated 6:00 a.m.</div><div id="notelist" hidden></div><div id="newnotes" hidden></div>';
+  var steps=[
+    {knows:true,n:'',t:'',s:'',lit:[],arr:[],chat:[]},
+    {aha:true,n:'',t:'',s:'',lit:[],arr:[],chat:[]},
+    {n:'',t:'How it does that: four pieces.',s:'Your phone holds your to-do note. Your assistant holds your profile. Your email and calendar are connected to it.',lit:[],arr:[],chat:[]},
+    {n:'1',t:'Morning: open a new chat and paste your note.',s:'That hands over what you owe people. If your list is a document in your connected account, the assistant reads it itself and you skip this.',lit:['phone','bot'],arr:['Paste'],chat:[['me','Make my brief for today.'+MEMO]]},
+    {n:'2',t:'It reads your profile.',s:'Saved once in its settings. It\'s how it knows who K is, and what matters to you.',lit:['bot'],arr:['Profile'],chat:[['me','Make my brief for today.'+MEMO]],prof:true},
+    {n:'3',t:'It reads your email and calendar.',s:'Through the connections. Nothing is copied by hand.',lit:['mail','cal','bot'],arr:['Mail','Cal'],chat:[['me','Make my brief for today.'+MEMO]]},
+    {n:'4',t:'You get one screen: your brief.',s:'Everything from the opening screens, in one place, with drafts you can edit and send.',lit:['bot'],arr:[],chat:[['ai',BRIEF]]},
+    {n:'5',t:'The brief ends with your updated to-do list. Copy it back to your note.',s:'"Omar link, done" comes off. "told K…" and "T agenda…" become real items. That\'s the short-term memory.',lit:['bot','phone'],arr:['Back'],chat:[['ai','<b>Today</b> … <b>Ignored</b> … (your brief, above)'],['ai',LIST]],note:'updated'},
+    {n:'6',t:'It suggests what it learned. Add the right lines to your profile.',s:'Now your shorthand is part of its memory. That\'s the long-term memory, and it\'s how it gets smarter.',lit:['bot'],arr:['Learn'],chat:[['ai',LIST]],note:'updated',learned:true,prof:true},
+    {n:'7',t:'During the day, jot promises under "New notes:".',s:'Tomorrow morning, it starts again at step 1.',lit:['phone'],arr:[],chat:[],note:'jot',learned:true},
+    {fut:true,n:'→',t:'Further down the road: it remembers, so it looks ahead.',s:'Everything circled is new. The rest works the way it does today. Each colored label says what that step takes.',lit:[],arr:['FList','FMail','FCal','FMeet','FChats'],chat:[['ai',FBRIEF]]},
+    {road:true,n:'',t:'Where it goes from here.',s:'This is the promise. How fast you get there depends on your tools and your IT, and IT can often be asked.',lit:[],arr:[],chat:[]},
+    {cmp:true,n:'',t:'How it compares.',s:'Different jobs. A consumer agent can run your errands. Your work, and anything about patients, belongs in the tool your institution approves.',lit:[],arr:[],chat:[]},
+    {divider:true,n:'',t:'',s:'',lit:[],arr:[],chat:[]},
+    {inst1:true,n:'',t:'Setting it up: six steps, about an hour.',s:'Do it once. You can stop after any step and pick up later.',lit:[],arr:[],chat:[]},
+    {inst2:true,n:'',t:'Setting it up, step by step.',s:'The kit folder is in one window, your AI assistant in the other. Each step names the file to open, and how you know it worked.',lit:[],arr:[],chat:[]},
+    {inst3:true,n:'',t:'Step by step: open the kit and let it interview you.',s:'Kit folder in one window, your AI assistant in the other.',lit:[],arr:[],chat:[]},
+    {inst4:true,n:'',t:'Step by step: save the instructions and practice.',s:'Kit folder in one window, your AI assistant in the other.',lit:[],arr:[],chat:[]},
+    {inst5:true,n:'',t:'Step by step: connect, then make your first brief.',s:'Kit folder in one window, your AI assistant in the other.',lit:[],arr:[],chat:[]}
+    ,{tryit:true,n:'',t:'Try it yourself.',s:'Scan the code or go to petermosca.com/build.',lit:[],arr:[],chat:[]}
+  ];
+  var ids=['phone','bot','mail','cal'], arrows=['Paste','Profile','Mail','Cal','Back','Learn','FList','FMail','FCal','FMeet','FChats'];
+  var origPhone=document.getElementById('phonescr').innerHTML, origBar=document.getElementById('botbar').innerHTML, origHead=document.getElementById('profhead').textContent;
+  var origList=document.getElementById('notelist').innerHTML, origNew=document.getElementById('newnotes').innerHTML, origProf=document.getElementById('proftext').innerHTML;
+  var i=0,timer=null,stage=document.getElementById('stage');
+  function render(){
+    var st=steps[i];
+    stage.classList.toggle('fut',!!st.fut);
+    stage.classList.toggle('roadon',!!st.road);
+    document.getElementById('phonescr').innerHTML=st.fut?FPHONE:origPhone;
+    document.getElementById('botbar').innerHTML=st.fut?'6:00 a.m. · ready before you wake <span class="need n1">A tool feature</span>':origBar;
+    document.getElementById('labPhone').textContent=st.fut?'Your to-do list':'Your phone';
+    document.getElementById('profhead').textContent=st.fut?'Your profile, months later':origHead;
+    document.getElementById('aha').classList.toggle('on',!!st.aha);
+    document.getElementById('knows').classList.toggle('on',!!st.knows);
+    document.getElementById('road').classList.toggle('on',!!st.road);
+    document.getElementById('cmp').classList.toggle('on',!!st.cmp);
+    document.getElementById('divider').classList.toggle('on',!!st.divider);
+    document.getElementById('tryit').classList.toggle('on',!!st.tryit);
+    document.getElementById('inst1').classList.toggle('on',!!st.inst1);
+    document.getElementById('inst2').classList.toggle('on',!!st.inst2);
+    ['inst3','inst4','inst5'].forEach(function(k){document.getElementById(k).classList.toggle('on',!!st[k]);});
+    document.getElementById('cap').style.display=(st.aha||st.knows||st.divider)?'none':'flex';
+    ids.forEach(function(id){var el=document.getElementById(id);el.classList.toggle('lit',st.lit.indexOf(id)>-1&&id!=='bot'||(id==='bot'&&st.lit.indexOf('bot')>-1&&!st.prof));el.classList.toggle('dim',st.lit.length>0&&st.lit.indexOf(id)<0);});
+    document.getElementById('profile').style.boxShadow=st.prof?'0 0 0 4px var(--accent)':'none';
+    arrows.forEach(function(a){var on=st.arr.indexOf(a)>-1;document.getElementById('a'+a).classList.toggle('on',on);document.getElementById('t'+a).classList.toggle('on',on);});
+    var chat=document.getElementById('chat');chat.innerHTML='';
+    st.chat.forEach(function(m){var d=document.createElement('div');d.className='msg '+m[0];d.innerHTML=m[1];chat.appendChild(d);});
+    var nl=document.getElementById('notelist'),nn=document.getElementById('newnotes');
+    if(st.note==='updated'||st.note==='jot'){
+      nl.innerHTML='<div class="ln fresh">Reply to Raj on sim lab · due Wed</div><div class="ln fresh">Interviewer list to Tasha · due Thu</div><div class="ln fresh"><span class="hl">Agenda for Thursday check-in with Tasha · due Thu</span></div><div class="ln fresh"><span class="hl">Summary for Dr. Kowalski · due Fri</span></div>';
+      nn.innerHTML=st.note==='jot'?'<div class="new fresh">told O Nov 11</div>':'';
+    } else {nl.innerHTML=origList;nn.innerHTML=origNew;}
+    document.getElementById('proftext').innerHTML=origProf+(st.learned?'<div class="new fresh" style="margin-top:4px;background:#fff">+ "K" is Dr. Kowalski, your chair. "T" is Tasha.</div>':'');
+    if(st.fut)document.getElementById('proftext').innerHTML='<div class="memln">Dr. Kowalski wants one paragraph, not a page.</div><div class="memln">Interview season: Tasha needs the faculty list three weeks before the first date.</div><div class="memln">Raj gives slots away after 48 hours.</div><div style="margin-top:4px"><span class="need n0">No new setup</span></div>';
+    document.getElementById('capn').textContent=st.n;document.getElementById('capt').textContent=st.t;document.getElementById('caps').textContent=st.s;
+    document.getElementById('count').textContent=(i+1)+' / '+steps.length;
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(n){i=(n+steps.length)%steps.length;render();}
+  function stop(){if(timer){clearInterval(timer);timer=null;document.getElementById('play').textContent='Play';}}
+  document.getElementById('prev').onclick=function(){stop();go(i-1)};
+  document.getElementById('next').onclick=function(){stop();go(i+1)};
+  document.getElementById('play').onclick=function(){if(timer){stop();return}this.textContent='Pause';timer=setInterval(function(){go(i+1)},4500);};
+  addEventListener('keydown',function(e){if(['ArrowRight',' ','Enter','PageDown'].indexOf(e.key)>-1){e.preventDefault();stop();go(i+1)}else if(['ArrowLeft','PageUp'].indexOf(e.key)>-1){e.preventDefault();stop();go(i-1)}});
+  stage.addEventListener('click',function(){stop();go(i+1)});
+  function fit(){var s=Math.min((innerWidth-24)/1280,(innerHeight-90)/720);stage.style.transform='scale('+s+')';}
+  addEventListener('resize',fit);fit();
+  i=Math.max(0,Math.min(steps.length-1,(parseInt(location.hash.slice(1),10)||1)-1));render();
+})();
+</script>
+</body>
+</html>
