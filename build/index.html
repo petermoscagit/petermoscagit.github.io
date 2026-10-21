@@ -33,6 +33,13 @@
   .ext { vertical-align:-1px; margin-left:3px; }
   .vlink { text-decoration:none; padding:4px; margin-left:2px; }
   .sr { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+  .cta { display:flex; flex-wrap:wrap; align-items:center; gap:12px 18px; margin:26px 0 8px; }
+  .button { display:inline-block; background:var(--accent); color:var(--bg); font-weight:700; font-size:19px; text-decoration:none; border-radius:8px; padding:12px 26px; }
+  .button:hover { filter:brightness(1.08); }
+  .button:focus-visible { outline:3px solid var(--ink); outline-offset:3px; }
+  .cta span { font-size:16px; color:var(--muted); }
+  .more { list-style:none; padding:0; }
+  .more a { color:var(--accent); font-weight:600; }
   footer { border-top:1px solid var(--rule); margin-top:40px; padding-top:16px; font-size:15px; }
 </style>
 </head>
@@ -40,27 +47,32 @@
 <main>
   <h1>Build your own digital chief of staff</h1>
   <p class="lead">An AI assistant that reads your calendar, your email and the quick notes on your phone, gives you a short brief each morning, and learns how you work.</p>
+  <p class="lead">It catches what slips: the canceled meeting still on your calendar, two emails that disagree, the promise you jotted in a hallway.</p>
   <p class="free">The kit is free. It runs in the AI assistant you already use for work.</p>
+
+  <p class="cta"><a class="button" href="setup.html">Start setup</a><span>Six steps, about an hour, once. Then about ten minutes each morning.</span></p>
+
+  <h2>What you'll need</h2>
+  <ul>
+    <li>The AI assistant your institution approved for work, such as Copilot, ChatGPT, Claude or Gemini, signed in with your work account.</li>
+    <li>A computer, for setup and the morning brief.</li>
+    <li>Your phone, for the note where you jot what you promised.</li>
+    <li>About an hour, once.</li>
+  </ul>
+
+  <h2>Before you start</h2>
+  <ul>
+    <li>No patient information. It's for administrative work.</li>
+    <li>It drafts. You decide what gets sent.</li>
+  </ul>
 
   <h2>See how it works</h2>
   <div class="video"><iframe src="https://www.youtube-nocookie.com/embed/DIdhYjEIpjA?rel=0" title="Digital chief of staff: a morning brief that knows your work" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy"></iframe></div>
   <p class="vcap">2½-minute video <a class="vlink" href="https://youtu.be/DIdhYjEIpjA" target="_blank" rel="noopener" aria-label="Watch on YouTube (opens in a new tab)" title="Watch on YouTube"><svg class="ext" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M9 2h5v5M14 2 7.5 8.5M12 9.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
-  <div class="links">
-    <a href="how-it-works.html"><b>Walk-through</b><span>Twenty slides: what it catches, one morning step by step, where it's going, and how to set it up. Click or use the arrow keys.</span></a>
-    <a href="overview.html"><b>Short overview</b><span>Ten slides, if you only have a few minutes.</span></a>
-  </div>
-
-  <h2>Set it up</h2>
-  <div class="links">
-    <a href="setup.html"><b>Step-by-step setup</b><span>Six steps, about an hour, once. Every prompt has a copy button. Open it on a computer next to your AI assistant.</span></a>
-    <a href="https://drive.google.com/drive/folders/1tyyH66MHWwO6hU1mvH9YLJkd0jxPQpr0" target="_blank" rel="noopener"><b>The kit folder <svg class="ext" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M9 2h5v5M14 2 7.5 8.5M12 9.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="sr"> (opens in a new tab)</span></b><span>The same material as files, plus a second practice day. Opens in Google Drive.</span></a>
-  </div>
-
-  <h2>Before you start</h2>
-  <ul>
-    <li>Use the AI tool your institution approved for your work, signed in with your work account.</li>
-    <li>No patient information. It's for administrative work.</li>
-    <li>It drafts. You decide what gets sent.</li>
+  <ul class="more">
+    <li><a href="how-it-works.html">Walk-through</a>: twenty slides, from what it catches to how to set it up</li>
+    <li><a href="overview.html">Short overview</a>: ten slides</li>
+    <li><a href="https://drive.google.com/drive/folders/1tyyH66MHWwO6hU1mvH9YLJkd0jxPQpr0" target="_blank" rel="noopener">The kit folder<svg class="ext" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M9 2h5v5M14 2 7.5 8.5M12 9.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="sr"> (opens in a new tab)</span></a>: the same material as files in Google Drive</li>
   </ul>
 
   <p>This is a pilot. It works today, and it changes as people try it. Feedback is welcome.</p>
