@@ -26,6 +26,10 @@
   .links span { display:block; color:var(--muted); font-size:16px; margin-top:2px; }
   ul { margin:0 0 16px; padding-left:22px; color:var(--muted); }
   li { margin-bottom:6px; }
+  .video { position:relative; aspect-ratio:16/9; width:100%; max-width:100%; border-radius:10px; overflow:hidden; border:1px solid var(--rule); background:#000; }
+  .video iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .vcap { font-size:15px; margin:8px 0 16px; }
+  .vcap a { color:var(--accent); }
   footer { border-top:1px solid var(--rule); margin-top:40px; padding-top:16px; font-size:15px; }
 </style>
 </head>
@@ -36,6 +40,8 @@
   <p class="free">Free. Nothing to buy, and nothing to install.</p>
 
   <h2>See how it works</h2>
+  <div class="video"><iframe src="https://www.youtube-nocookie.com/embed/DIdhYjEIpjA?rel=0" title="Digital chief of staff: a morning brief that knows your work" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy"></iframe></div>
+  <p class="vcap">A 2½-minute video. <a href="https://youtu.be/DIdhYjEIpjA">Watch it on YouTube</a></p>
   <div class="links">
     <a href="how-it-works.html"><b>Walk-through</b><span>Twenty slides: what it catches, one morning step by step, where it's going, and how to set it up. Click or use the arrow keys.</span></a>
     <a href="overview.html"><b>Short overview</b><span>Ten slides, if you only have a few minutes.</span></a>
