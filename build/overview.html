@@ -37,9 +37,9 @@ ul.plain li::before{content:"";position:absolute;left:0;top:.5em;width:12px;heig
 .foot{font-size:22px;font-weight:600}
 /* title slide */
 .title{background:var(--accent);color:#fff;justify-content:center}
-.title .kicker{color:#cfeee0}
+.title .kicker{color:#ffffff}
 .title .big{color:#e9f6f0;max-width:34ch;margin-top:8px}
-.title .agenda{display:flex;gap:28px;margin-top:40px;font-size:19px;color:#cfeee0}
+.title .agenda{display:flex;gap:28px;margin-top:40px;font-size:19px;color:#ffffff}
 /* phone brief */
 .briefwrap{display:grid;grid-template-columns:400px 1fr;gap:48px;align-items:start}
 .phone{background:#111;border-radius:36px;padding:14px;width:400px}
@@ -226,20 +226,20 @@ table.road td:last-child,table.road th:last-child{padding-left:14px}
 
 <section class="slide">
   <div class="kicker">Setting it up</div>
-  <h2>About an hour, once.</h2>
+  <h2>Six steps, once.</h2>
   <div class="steps grow" style="align-content:start">
-    <div class="step"><div><h3>Open the kit folder</h3><p>Start with the README.</p></div><span class="t">2 min</span></div>
-    <div class="step"><div><h3>Let it interview you</h3><p>It asks about ten questions and writes your profile.</p></div><span class="t">15 min</span></div>
-    <div class="step"><div><h3>Save the instructions</h3><p>The rules and your profile go into the assistant's settings.</p></div><span class="t">15 min</span></div>
-    <div class="step"><div><h3>Try it on a sample morning</h3><p>See it catch the traps.</p></div><span class="t">15 min</span></div>
-    <div class="step"><div><h3>Connect email and calendar</h3><p>Follow the vendor's help page.</p></div><span class="t">10 min</span></div>
-    <div class="step"><div><h3>Make your first brief</h3><p>Save its to-do list as a pinned phone note.</p></div><span class="t">10 min</span></div>
+    <div class="step"><div><h3>Open the kit folder</h3><p>Start with the README.</p></div></div>
+    <div class="step"><div><h3>Let it interview you</h3><p>It asks about ten questions and writes your profile.</p></div></div>
+    <div class="step"><div><h3>Save the instructions</h3><p>The rules and your profile go into the assistant's settings.</p></div></div>
+    <div class="step"><div><h3>Try it on a sample morning</h3><p>See it catch the traps.</p></div></div>
+    <div class="step"><div><h3>Connect email and calendar</h3><p>Follow the vendor's help page.</p></div></div>
+    <div class="step"><div><h3>Make your first brief</h3><p>Save its to-do list as a pinned phone note.</p></div></div>
   </div>
 </section>
 
 <section class="slide">
   <div class="kicker">Every day</div>
-  <h2>About ten minutes in the morning.</h2>
+  <h2>Every morning.</h2>
   <div class="cols grow">
     <div class="card">
       <h3>Morning</h3>
@@ -299,7 +299,7 @@ table.road td:last-child,table.road th:last-child{padding-left:14px}
 </section>
 
 </div></div>
-<div id="nav"><button id="prev" aria-label="Previous slide">←</button><span id="count"></span><button id="next" aria-label="Next slide">→</button></div>
+<div id="nav"><button id="prev" aria-label="Previous slide">←</button><span id="count" role="status" aria-live="polite"></span><button id="next" aria-label="Next slide">→</button></div>
 <script>
 (function(){
   var slides=[].slice.call(document.querySelectorAll('.slide'));
